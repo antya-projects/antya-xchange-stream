@@ -41,7 +41,8 @@ subprojects {
             'mockito'       			   :'2.13.0',
             'assertj'       			   :'3.8.0',
             'jsonpath'				       :'2.4.0',
-            'commonCollections'			   :'4.1'
+            'commonCollections'			   :'4.1',
+            'knowmXchange'				:'4.3.2'
     ]
 
     configurations {
@@ -77,6 +78,7 @@ subprojects {
             dependency group: 'org.assertj', name: 'assertj-core', version: versions.assertj
             dependency group: 'com.jayway.jsonpath', name: 'json-path', version: versions.jsonpath
             dependency group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonCollections
+            dependency group: 'org.knowm.xchange', name: 'xchange-core', version: versions.knowmXchange
         }
     }
 
@@ -86,6 +88,7 @@ subprojects {
         compile 'org.apache.commons:commons-lang3'
         compile 'io.springfox:springfox-swagger2'
         compile 'io.springfox:springfox-swagger-ui'
+        compile 'org.knowm.xchange:xchange-core'
 
         testCompile 'org.mockito:mockito-core'
         testCompile 'com.jayway.jsonpath:json-path'
