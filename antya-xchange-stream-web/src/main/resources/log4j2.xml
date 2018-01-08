@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG" name="App" packages="">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+          <!--   <JsonLayout complete="false" compact="true" eventEol="true" properties="true" locationInfo="true" /> -->
+          <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>

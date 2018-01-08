@@ -1,0 +1,125 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.4.RELEASE"
+}
+
+apply from: 'buildHelp.gradle'
+
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--abbrev=0'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+subprojects {
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'eclipse'
+    group = 'com.antya'
+    version = getVersionName()
+
+    def versions = [
+            'springBom'      		       :'Brussels-SR6',
+            'guava'         			   :'23.5-jre',
+            'swagger'       			   :'2.7.0',
+            'mockito'       			   :'2.13.0',
+            'assertj'       			   :'3.8.0',
+            'jsonpath'				       :'2.4.0',
+            'commonCollections'			   :'4.1'
+    ]
+
+    configurations {
+        compile.exclude module: 'spring-boot-starter-logging'
+        compile.exclude module: 'guava-osgi'
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.guava:guava:' + versions.guava
+            forcedModules = ['com.google.guava:guava:' + versions.guava]
+        }
+    }
+
+    task sourceJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allJava
+    }
+
+    artifacts {
+        archives sourceJar
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom 'io.spring.platform:platform-bom:' + versions.springBom
+        }
+        dependencies {
+            dependency group: 'com.google.guava', name: 'guava', version: versions.guava
+            dependency group: 'io.springfox', name: 'springfox-swagger2', version: versions.swagger
+            dependency group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.swagger
+            dependency group: 'org.mockito', name: 'mockito-core', version: versions.mockito
+            dependency group: 'org.assertj', name: 'assertj-core', version: versions.assertj
+            dependency group: 'com.jayway.jsonpath', name: 'json-path', version: versions.jsonpath
+            dependency group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonCollections
+        }
+    }
+
+    dependencies {
+	    compile 'org.springframework.boot:spring-boot-starter-log4j2'
+		compile 'com.google.guava:guava'
+        compile 'org.apache.commons:commons-lang3'
+        compile 'io.springfox:springfox-swagger2'
+        compile 'io.springfox:springfox-swagger-ui'
+
+        testCompile 'org.mockito:mockito-core'
+        testCompile 'com.jayway.jsonpath:json-path'
+        testCompile 'junit:junit'
+        testCompile 'org.springframework.boot:spring-boot-starter-test'
+        testCompile 'org.hamcrest:hamcrest-core'
+        testCompile 'org.hamcrest:hamcrest-library'
+        testCompile 'org.assertj:assertj-core'
+        testCompile 'org.springframework.security:spring-security-test'
+    }
+
+    test {
+        testLogging {
+            events 'started', 'passed'
+        }
+        systemProperties = System.getProperties()
+        systemProperties['user.dir'] = workingDir
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://repo.spring.io/libs-release" }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.web
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3'
+}

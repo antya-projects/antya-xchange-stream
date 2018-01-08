@@ -1,0 +1,38 @@
+apply plugin: 'war'
+
+war {
+    archiveName = "antya-xchange-stream.war"
+    manifest {
+        attributes("version": getVersion())
+    }
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-aop'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+    compile 'org.springframework.boot:spring-boot-starter-aop'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.apache.commons:commons-collections4'
+}
+
+task tomcatDist(dependsOn: build, description: 'Deploys the .war to local Tomcat, if CATALINA_HOME is setup')  << {
+	def catalinaHome = "$System.env.CATALINA_HOME"
+	println('Copying .war to ' + catalinaHome)
+    copy {
+        from 'build/libs'
+        into catalinaHome + '/webapps'
+        include '**/*.war'
+    }
+}
+
+tomcatDist.onlyIf {
+	null != "$System.env.CATALINA_HOME"
+}
+
+processResources {
+    filesMatching('**/*.properties') { expand(project.properties) }
+}

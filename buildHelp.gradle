@@ -1,0 +1,31 @@
+
+task nextTag(description: 'Create a new tag. This task is run on jenkins for running a build') << {
+    try {
+        println "Starting creation of new tag"
+        def code = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--abbrev=0'
+            standardOutput = code
+        }
+
+        println "Output of git describe --tags --abbrev=0 is : $code"
+
+        def index = code.toString().lastIndexOf(".")
+        def prefix = code.toString().substring(0, index + 1)
+        def nextVer = 1 + code.toString().split("\\.")[2].toInteger()
+
+        def nextTag = prefix + nextVer
+        println "Creating $nextTag "
+        exec {
+            commandLine 'git', 'tag', nextTag
+        }
+        println "Created $nextTag successfully"
+        exec {
+            commandLine 'git', 'push', 'origin', '--tags'
+        }
+        println "Pushed $nextTag successfully"
+    }
+    catch (ignored) {
+        return -1;
+    }
+}
